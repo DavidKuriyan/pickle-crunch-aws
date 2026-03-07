@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pickle&Crunch — Artisan Indian Delicacies</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--earth:#2C1A0E;--rust:#C4440A;--turmeric:#E8960C;--cream:#FDF6EC;--sage:#7A8C5E;--clay:#A0522D;--light-rust:#F5E6D3;--dark:#1A0F07;--white:#FFFDF9;}
+  *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--earth);overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 5%;background:rgba(253,246,236,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(196,68,10,0.12);transition:all .3s;}
+  nav.scrolled{padding:12px 5%;box-shadow:0 4px 24px rgba(44,26,14,0.1);}
+  .nav-logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--rust);letter-spacing:-.5px;text-decoration:none;}
+  .nav-logo span{color:var(--turmeric);}
+  .nav-links{display:flex;gap:2rem;list-style:none;}
+  .nav-links a{font-size:.9rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.3px;position:relative;transition:color .2s;}
+  .nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:2px;background:var(--rust);transform:scaleX(0);transition:transform .3s;transform-origin:left;}
+  .nav-links a:hover{color:var(--rust);}.nav-links a:hover::after{transform:scaleX(1);}
+  .nav-right{display:flex;align-items:center;gap:1rem;}
+  .signin-btn{background:transparent;color:var(--earth);border:2px solid var(--earth);padding:9px 22px;border-radius:50px;font-size:.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .25s;}
+  .signin-btn:hover{background:var(--earth);color:white;}
+  .user-info{display:flex;align-items:center;gap:10px;}
+  .user-info span{font-size:.88rem;font-weight:600;color:var(--earth);}
+  .logout-btn{background:transparent;color:var(--rust);border:2px solid var(--rust);padding:6px 18px;border-radius:50px;font-size:.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .25s;}
+  .logout-btn:hover{background:var(--rust);color:white;}
+  .cart-btn{background:var(--rust);color:white;border:none;cursor:pointer;padding:10px 22px;border-radius:50px;font-size:.9rem;font-weight:600;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px;transition:all .25s;}
+  .cart-btn:hover{background:var(--earth);transform:translateY(-2px);}
+  .cart-count{background:var(--turmeric);color:var(--earth);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;}
+
+  /* HERO */
+  .hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:100px 5% 60px;gap:4rem;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-20%;right:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(232,150,12,.12) 0%,transparent 70%);pointer-events:none;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--light-rust);border:1px solid rgba(196,68,10,.2);padding:7px 16px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--rust);letter-spacing:.5px;text-transform:uppercase;margin-bottom:1.5rem;}
+  .hero-badge::before{content:'🌿';font-size:1rem;}
+  .hero h1{font-family:'Playfair Display',serif;font-size:clamp(3rem,6vw,5rem);line-height:1.05;font-weight:900;color:var(--earth);margin-bottom:1.5rem;animation:fadeUp .7s .1s ease forwards;opacity:0;}
+  .hero h1 em{font-style:italic;color:var(--rust);display:block;}
+  .hero-sub{font-size:1.1rem;line-height:1.7;color:#5C3D1E;max-width:520px;margin-bottom:2.5rem;animation:fadeUp .7s .2s ease forwards;opacity:0;}
+  .hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp .7s .3s ease forwards;opacity:0;}
+  .btn-primary{background:var(--rust);color:white;text-decoration:none;padding:14px 32px;border-radius:50px;font-weight:600;font-size:1rem;transition:all .25s;display:inline-block;box-shadow:0 4px 18px rgba(196,68,10,.3);}
+  .btn-primary:hover{background:var(--earth);transform:translateY(-3px);}
+  .btn-secondary{background:transparent;color:var(--earth);text-decoration:none;padding:14px 32px;border-radius:50px;font-weight:600;font-size:1rem;border:2px solid var(--earth);transition:all .25s;display:inline-block;}
+  .btn-secondary:hover{background:var(--earth);color:white;}
+  .hero-stats{display:flex;gap:2rem;margin-top:2.5rem;animation:fadeUp .7s .4s ease forwards;opacity:0;}
+  .stat{display:flex;flex-direction:column;}
+  .stat strong{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--rust);}
+  .stat small{font-size:.8rem;color:#8A6040;font-weight:500;}
+  .hero-visual{position:relative;animation:fadeIn .9s .2s ease forwards;opacity:0;}
+  .hero-img-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;border-radius:24px;overflow:hidden;}
+  .hero-img-grid img{width:100%;height:220px;object-fit:cover;transition:transform .4s;}
+  .hero-img-grid img:hover{transform:scale(1.04);}
+  .hero-img-grid img:first-child{grid-row:1/3;height:100%;}
+  .hero-float{position:absolute;bottom:-20px;left:-20px;background:white;border-radius:16px;padding:14px 20px;box-shadow:0 8px 30px rgba(44,26,14,.15);display:flex;align-items:center;gap:12px;animation:float 3s ease-in-out infinite;}
+  .hero-float .icon{font-size:2rem;}
+  .hero-float strong{display:block;font-size:.9rem;font-weight:700;color:var(--earth);}
+  .hero-float span{font-size:.75rem;color:#8A6040;}
+
+  /* MARQUEE */
+  .marquee-strip{background:var(--rust);color:white;padding:14px 0;overflow:hidden;white-space:nowrap;}
+  .marquee-inner{display:inline-flex;gap:3rem;animation:marquee 20s linear infinite;}
+  .marquee-inner span{font-size:.9rem;font-weight:600;letter-spacing:.5px;}
+  .marquee-inner span::before{content:'✦ ';opacity:.7;}
+
+  /* SECTIONS */
+  section{padding:80px 5%;}
+  .section-header{text-align:center;margin-bottom:3.5rem;}
+  .section-label{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rust);margin-bottom:.75rem;}
+  .section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--earth);line-height:1.1;}
+  .section-title em{font-style:italic;color:var(--rust);}
+  .section-desc{margin-top:.8rem;font-size:1rem;color:#6B4423;max-width:500px;margin-inline:auto;line-height:1.7;}
+
+  /* FILTER TABS */
+  .filter-tabs{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-bottom:2.5rem;}
+  .tab-btn{padding:9px 24px;border-radius:50px;border:2px solid var(--earth);background:transparent;cursor:pointer;font-size:.9rem;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--earth);transition:all .2s;}
+  .tab-btn.active,.tab-btn:hover{background:var(--rust);border-color:var(--rust);color:white;}
+
+  /* PRODUCT GRID */
+  .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;}
+  .product-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 6px 24px rgba(44,26,14,.08);transition:all .3s;animation:fadeUp .5s ease forwards;opacity:0;animation-play-state:paused;}
+  .product-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(44,26,14,.15);}
+  .product-img{position:relative;overflow:hidden;height:240px;}
+  .product-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+  .product-card:hover .product-img img{transform:scale(1.08);}
+  .product-tag{position:absolute;top:12px;left:12px;background:var(--turmeric);color:var(--dark);padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+  .product-fav{position:absolute;top:12px;right:12px;background:white;border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.1);transition:all .2s;}
+  .product-fav:hover{transform:scale(1.1);}
+  .product-body{padding:20px;}
+  .product-cat{font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rust);margin-bottom:8px;}
+  .product-name{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--earth);margin-bottom:8px;line-height:1.3;}
+  .product-desc{font-size:.87rem;color:#6B4423;line-height:1.5;margin-bottom:16px;min-height:42px;}
+  .product-footer{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid rgba(44,26,14,.08);}
+  .product-price{display:flex;flex-direction:column;}
+  .price-main{font-size:1.3rem;font-weight:700;color:var(--rust);}
+  .price-weight{font-size:.75rem;color:#8A6040;}
+  .product-rating{font-size:.85rem;font-weight:600;color:var(--earth);}
+  .add-btn{background:var(--rust);color:white;border:none;width:38px;height:38px;border-radius:50%;font-size:1.3rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;}
+  .add-btn:hover{background:var(--earth);transform:scale(1.1);}
+  .loading,.error,.empty{text-align:center;padding:60px 20px;font-size:1.1rem;color:#8A6040;grid-column:1/-1;}
+
+  /* CART */
+  .cart-overlay{position:fixed;inset:0;background:rgba(26,15,7,.6);backdrop-filter:blur(4px);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .cart-overlay.open{opacity:1;pointer-events:all;}
+  .cart-sidebar{position:fixed;top:0;right:0;bottom:0;width:100%;max-width:450px;background:var(--white);box-shadow:-8px 0 32px rgba(44,26,14,.2);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+  .cart-sidebar.open{transform:translateX(0);}
+  .cart-header{padding:24px 28px;border-bottom:2px solid rgba(44,26,14,.08);display:flex;justify-content:space-between;align-items:center;}
+  .cart-header h3{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--earth);}
+  .cart-close{background:var(--light-rust);border:none;cursor:pointer;width:38px;height:38px;border-radius:50%;font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--earth);}
+  .cart-close:hover{background:var(--rust);color:white;}
+  .cart-body{flex:1;overflow-y:auto;padding:20px 28px;}
+  .cart-empty{text-align:center;padding:80px 20px;}
+  .empty-icon{font-size:4rem;margin-bottom:16px;}
+  .cart-empty p{font-size:.95rem;color:#6B4423;line-height:1.6;}
+  .cart-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid rgba(44,26,14,.06);}
+  .cart-item:last-child{border-bottom:none;}
+  .cart-item img{width:80px;height:80px;object-fit:cover;border-radius:12px;}
+  .cart-item-info{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .cart-item h4{font-size:.95rem;font-weight:700;color:var(--earth);}
+  .cart-item span{font-size:.8rem;color:#8A6040;}
+  .cart-item-controls{display:flex;align-items:center;gap:12px;margin-top:8px;}
+  .qty-btn{background:var(--light-rust);border:none;cursor:pointer;width:28px;height:28px;border-radius:50%;font-size:1.1rem;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--earth);transition:all .2s;}
+  .qty-btn:hover{background:var(--rust);color:white;}
+  .qty-val{font-size:.95rem;font-weight:700;color:var(--earth);min-width:24px;text-align:center;}
+  .cart-item-price{font-size:1.1rem;font-weight:700;color:var(--rust);align-self:flex-start;}
+  .cart-footer{padding:24px 28px;border-top:2px solid rgba(44,26,14,.08);background:var(--cream);}
+  .cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .cart-total span{font-size:1rem;font-weight:600;color:var(--earth);}
+  .cart-total strong{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--rust);}
+  .checkout-btn{width:100%;padding:16px;background:var(--rust);color:white;border:none;border-radius:50px;font-size:1.05rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .25s;box-shadow:0 6px 20px rgba(196,68,10,.3);}
+  .checkout-btn:hover{background:var(--earth);transform:translateY(-2px);}
+
+  /* MODAL */
+  .signin-overlay{position:fixed;inset:0;background:rgba(26,15,7,.6);backdrop-filter:blur(6px);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;}
+  .signin-overlay.open{opacity:1;pointer-events:all;}
+  .signin-modal{background:var(--white);border-radius:28px;padding:48px 44px;width:100%;max-width:440px;position:relative;box-shadow:0 24px 80px rgba(44,26,14,.25);transform:translateY(30px) scale(.97);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;opacity:0;}
+  .signin-overlay.open .signin-modal{transform:translateY(0) scale(1);opacity:1;}
+  .signin-close{position:absolute;top:18px;right:18px;background:var(--light-rust);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--earth);}
+  .signin-close:hover{background:var(--rust);color:white;}
+  .signin-modal h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--earth);text-align:center;margin-bottom:8px;}
+  .signin-subtitle{font-size:.9rem;color:#8A6040;text-align:center;margin-bottom:2rem;line-height:1.5;}
+  .form-tabs{display:flex;gap:8px;margin-bottom:24px;background:var(--cream);padding:4px;border-radius:50px;}
+  .form-tab{flex:1;padding:10px;border:none;background:transparent;border-radius:50px;font-size:.9rem;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--earth);cursor:pointer;transition:all .2s;}
+  .form-tab.active{background:white;color:var(--rust);box-shadow:0 2px 8px rgba(44,26,14,.1);}
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block;font-size:.85rem;font-weight:600;color:var(--earth);margin-bottom:7px;letter-spacing:.3px;}
+  .form-group input{width:100%;padding:13px 16px;border:2px solid rgba(44,26,14,.15);border-radius:12px;font-size:.95rem;font-family:'DM Sans',sans-serif;color:var(--earth);background:var(--cream);transition:border-color .2s,box-shadow .2s;outline:none;}
+  .form-group input:focus{border-color:var(--rust);box-shadow:0 0 0 3px rgba(196,68,10,.1);}
+  .form-group input::placeholder{color:#B89070;}
+  .signin-submit{width:100%;padding:15px;background:var(--rust);color:white;border:none;border-radius:50px;font-size:1rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .25s;box-shadow:0 4px 18px rgba(196,68,10,.3);margin-top:8px;}
+  .signin-submit:hover{background:var(--earth);transform:translateY(-2px);}
+  .signin-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+  .signin-error{background:#FFF0ED;border:1px solid rgba(196,68,10,.3);color:var(--rust);border-radius:10px;padding:10px 14px;font-size:.85rem;font-weight:500;margin-bottom:16px;display:none;}
+  .signin-error.show{display:block;}
+  #signinSuccess{text-align:center;padding:16px 0;}
+  .success-icon{font-size:3rem;margin-bottom:12px;}
+  #signinSuccess h3{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--earth);margin-bottom:8px;}
+  #signinSuccess p{font-size:.9rem;color:#6B4423;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--earth);color:white;padding:14px 28px;border-radius:50px;font-size:.9rem;font-weight:600;z-index:400;box-shadow:0 8px 24px rgba(44,26,14,.4);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* FOOTER */
+  footer{background:var(--earth);color:rgba(255,255,255,.7);text-align:center;padding:32px 5%;font-size:.88rem;}
+  footer strong{color:var(--turmeric);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:90px;}.hero-visual{display:none;}nav .nav-links{display:none;}.cart-sidebar{max-width:100%;}}
+  @media(max-width:600px){.hero-stats{gap:1.5rem;flex-wrap:wrap;}.product-grid{grid-template-columns:1fr;}.signin-modal{padding:36px 24px;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="/" class="nav-logo">Pickle<span>&</span>Crunch</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="/about">About</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="signin-btn" id="signinBtn" onclick="openSignIn()">Sign In</button>
+    <div class="user-info" id="userInfo" style="display:none;">
+      <span id="userGreeting"></span>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+    <button class="cart-btn" onclick="toggleCart()">
+      <span>Cart</span>
+      <div class="cart-count" id="cartCount">0</div>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Preservative-Free Since 1995</div>
+    <h1>Authentic Homemade<em>Pickles & Snacks</em></h1>
+    <p class="hero-sub">Cloud-powered artisan platform bringing traditional Indian recipes to your doorstep. Real-time inventory, seamless ordering, AWS-backed reliability.</p>
+    <div class="hero-ctas">
+      <a href="#products" class="btn-primary">Browse Products</a>
+      <a href="#products" class="btn-secondary">View Collection</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><strong>5000+</strong><small>Happy Customers</small></div>
+      <div class="stat"><strong>50+</strong><small>Artisan Recipes</small></div>
+      <div class="stat"><strong>24/7</strong><small>Cloud Availability</small></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-grid" id="heroGrid"></div>
+    <div class="hero-float">
+      <div class="icon">🌿</div>
+      <div><strong>100% Natural</strong><span>No preservatives</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner" id="marqueeInner"></div>
+</div>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="section-header">
+    <span class="section-label">Our Collection</span>
+    <h2 class="section-title">Handcrafted <em>Delicacies</em></h2>
+    <p class="section-desc">Real-time inventory from AWS DynamoDB. Every purchase updates stock instantly.</p>
+  </div>
+  <div class="filter-tabs">
+    <button class="tab-btn active" onclick="filterProducts('all',this)">All</button>
+    <button class="tab-btn" onclick="filterProducts('pickles',this)">Pickles</button>
+    <button class="tab-btn" onclick="filterProducts('snacks',this)">Snacks</button>
+  </div>
+  <div class="product-grid" id="productGrid">
+    <div class="loading">Loading products...</div>
+  </div>
+</section>
+
+<!-- RECOMMENDATIONS -->
+<section id="recommendations" style="display:none;">
+  <div class="section-header">
+    <span class="section-label">Just For You</span>
+    <h2 class="section-title">Personalized <em>Picks</em></h2>
+    <p class="section-desc">Based on your preferences</p>
+  </div>
+  <div class="product-grid" id="recommendationsGrid"></div>
+</section>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button class="cart-close" onclick="toggleCart()">×</button>
+  </div>
+  <div class="cart-body" id="cartItems">
+    <div class="cart-empty"><div class="empty-icon">🧺</div><p>Your cart is empty.<br>Add some delicious goodies!</p></div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total"><span>Total</span><strong id="cartTotal">₹0</strong></div>
+    <button class="checkout-btn" onclick="checkout()">Place Order</button>
+  </div>
+</div>
+
+<!-- SIGN IN / SIGN UP MODAL -->
+<div class="signin-overlay" id="signinOverlay" onclick="handleOverlayClick(event)">
+  <div class="signin-modal">
+    <button class="signin-close" onclick="closeSignIn()">×</button>
+    <div id="signinForm">
+      <h2>Welcome Back</h2>
+      <p class="signin-subtitle">Sign in to order your favourite homemade goodies</p>
+      <div class="form-tabs">
+        <button class="form-tab active" id="signinTab" onclick="switchTab('signin')">Sign In</button>
+        <button class="form-tab" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" onsubmit="handleSignIn(event);return false;">
+        <div class="form-group"><label>Email</label><input type="email" id="signinEmail" placeholder="your@email.com" required></div>
+        <div class="form-group"><label>Password</label><input type="password" id="signinPassword" placeholder="••••••••" required></div>
+        <div class="signin-error" id="signinError"></div>
+        <button type="submit" class="signin-submit" id="signinSubmit">Sign In</button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="signupForm" onsubmit="handleSignUp(event);return false;" style="display:none;">
+        <div class="form-group"><label>Full Name</label><input type="text" id="signupName" placeholder="Your Name" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com" required></div>
+        <div class="form-group"><label>Phone <span style="color:#B89070;font-weight:400;">(optional)</span></label><input type="tel" id="signupPhone" placeholder="+91 98765 43210"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6"></div>
+        <div class="signin-error" id="signupError"></div>
+        <button type="submit" class="signin-submit" id="signupSubmit">Create Account</button>
+      </form>
+    </div>
+
+    <div id="signinSuccess" style="display:none;">
+      <div class="success-icon">✅</div>
+      <h3>You're in!</h3>
+      <p>Redirecting you...</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  <p>© 2024 <strong>Pickle&Crunch</strong> — Artisan Homemade Delicacies. Powered by AWS DynamoDB & EC2.</p>
+</footer>
+
+<script>
+// ============================================================================
+// STATE
+// ============================================================================
+let cart = [], favorites = new Set(), currentUser = null, allProducts = [];
+
+// ============================================================================
+// API HELPER — always relative URL so fetch() works when served by Flask
+// ============================================================================
+async function apiCall(endpoint, options = {}) {
+  const res = await fetch(endpoint, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    credentials: 'same-origin'   // send session cookie
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+// ============================================================================
+// AUTH
+// ============================================================================
+async function checkAuthStatus() {
+  try {
+    const data = await apiCall('/api/auth/status');
+    if (data.authenticated) {
+      setLoggedIn(data.user);
+      loadRecommendations();
+    }
+  } catch (e) { console.error('Auth check:', e); }
+}
+
+function setLoggedIn(user) {
+  currentUser = user;
+  document.getElementById('signinBtn').style.display  = 'none';
+  document.getElementById('userInfo').style.display   = 'flex';
+  document.getElementById('userGreeting').textContent = '👤 ' + (user.name || user.username || user.email);
+}
+
+function setLoggedOut() {
+  currentUser = null;
+  document.getElementById('signinBtn').style.display  = '';
+  document.getElementById('userInfo').style.display   = 'none';
+  document.getElementById('userGreeting').textContent = '';
+  document.getElementById('recommendations').style.display = 'none';
+}
+
+function switchTab(tab) {
+  document.getElementById('signinTab').classList.toggle('active', tab === 'signin');
+  document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+  document.getElementById('loginForm').style.display  = tab === 'signin' ? '' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? '' : 'none';
+  document.getElementById('signinError').classList.remove('show');
+  document.getElementById('signupError').classList.remove('show');
+}
+
+async function handleSignIn(e) {
+  e.preventDefault();
+  const email    = document.getElementById('signinEmail').value.trim();
+  const password = document.getElementById('signinPassword').value;
+  const errEl    = document.getElementById('signinError');
+  const btn      = document.getElementById('signinSubmit');
+
+  errEl.classList.remove('show');
+  btn.disabled    = true;
+  btn.textContent = 'Signing in...';
+
+  try {
+    const data = await apiCall('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    showSuccess();
+    setLoggedIn(data.user);
+    setTimeout(() => { closeSignIn(); showToast('Welcome back, ' + data.user.name + '! 👋'); loadRecommendations(); }, 1200);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+async function handleSignUp(e) {
+  e.preventDefault();
+  const name     = document.getElementById('signupName').value.trim();
+  const email    = document.getElementById('signupEmail').value.trim();
+  const phone    = document.getElementById('signupPhone').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const errEl    = document.getElementById('signupError');
+  const btn      = document.getElementById('signupSubmit');
+
+  errEl.classList.remove('show');
+  btn.disabled    = true;
+  btn.textContent = 'Creating account...';
+
+  try {
+    const data = await apiCall('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, phone, password })
+    });
+    showSuccess();
+    setLoggedIn(data.user);
+    setTimeout(() => { closeSignIn(); showToast('Welcome, ' + data.user.name + '! 🎉'); }, 1200);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Create Account';
+  }
+}
+
+async function handleLogout() {
+  try { await apiCall('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+  setLoggedOut();
+  showToast('You have been signed out.');
+}
+
+function showSuccess() {
+  document.getElementById('signinForm').style.display    = 'none';
+  document.getElementById('signinSuccess').style.display = 'block';
+}
+
+// ============================================================================
+// PRODUCTS
+// ============================================================================
+async function loadProducts(category = 'all') {
+  document.getElementById('productGrid').innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const endpoint = category === 'all' ? '/api/products' : `/api/products?category=${category}`;
+    const data     = await apiCall(endpoint);
+    allProducts    = data.products;
+    renderProducts(allProducts);
+  } catch (e) {
+    document.getElementById('productGrid').innerHTML = '<div class="error">Failed to load products. Is Flask running?</div>';
+  }
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('productGrid');
+  if (!products || !products.length) { grid.innerHTML = '<div class="empty">No products found.</div>'; return; }
+  grid.innerHTML = '';
+  products.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.style.animationDelay = `${i * 0.06}s`;
+    const isFav = favorites.has(p.product_id);
+    card.innerHTML = `
+      <div class="product-img">
+        <img src="${p.img}" alt="${p.name}" loading="lazy">
+        <span class="product-tag">${p.tag || 'New'}</span>
+        ${currentUser ? `<button class="product-fav" onclick="toggleFav('${p.product_id}',this)">${isFav ? '❤️' : '🤍'}</button>` : ''}
+      </div>
+      <div class="product-body">
+        <div class="product-cat">${(p.category || '').replace(/_/g,' ')}</div>
+        <h3 class="product-name">${p.name}</h3>
+        <p class="product-desc">${p.desc || ''}</p>
+        <div class="product-footer">
+          <div class="product-price">
+            <span class="price-main">₹${p.price}</span>
+            <span class="price-weight">${p.weight}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="product-rating">⭐ ${p.rating}</span>
+            <button class="add-btn" onclick="addToCart('${p.product_id}')" title="Add to cart">+</button>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  setTimeout(() => observeElements('.product-card'), 80);
+}
+
+function filterProducts(cat, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadProducts(cat);
+}
+
+async function loadRecommendations() {
+  if (!currentUser) return;
+  try {
+    const data = await apiCall('/api/recommendations');
+    if (data.recommendations && data.recommendations.length) {
+      document.getElementById('recommendations').style.display = 'block';
+      const grid = document.getElementById('recommendationsGrid');
+      grid.innerHTML = '';
+      data.recommendations.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.style.animationDelay = `${i * 0.06}s`;
+        card.innerHTML = `
+          <div class="product-img"><img src="${p.img}" alt="${p.name}" loading="lazy"><span class="product-tag">${p.tag||'Recommended'}</span></div>
+          <div class="product-body">
+            <div class="product-cat">${(p.category||'').replace(/_/g,' ')}</div>
+            <h3 class="product-name">${p.name}</h3>
+            <p class="product-desc">${p.desc||''}</p>
+            <div class="product-footer">
+              <div class="product-price"><span class="price-main">₹${p.price}</span><span class="price-weight">${p.weight}</span></div>
+              <button class="add-btn" onclick="addToCart('${p.product_id}')">+</button>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+  } catch (e) {}
+}
+
+// ============================================================================
+// FAVORITES
+// ============================================================================
+async function toggleFav(pid, btn) {
+  if (!currentUser) { showToast('Sign in to save favourites'); openSignIn(); return; }
+  try {
+    if (favorites.has(pid)) {
+      await apiCall(`/api/favorites/${pid}`, { method: 'DELETE' });
+      favorites.delete(pid); btn.textContent = '🤍'; showToast('Removed from favourites');
+    } else {
+      await apiCall('/api/favorites', { method: 'POST', body: JSON.stringify({ product_id: pid }) });
+      favorites.add(pid); btn.textContent = '❤️'; showToast('Added to favourites ❤️');
+    }
+  } catch (e) { showToast('Failed to update favourites'); }
+}
+
+// ============================================================================
+// CART
+// ============================================================================
+function addToCart(pid) {
+  const p = allProducts.find(p => p.product_id === pid);
+  if (!p) { showToast('Product not found'); return; }
+  const ex = cart.find(c => c.product_id === pid);
+  if (ex) { ex.qty++; } else { cart.push({ ...p, qty: 1 }); }
+  updateCartUI();
+  showToast(`${p.name} added to cart 🛒`);
+}
+
+function removeFromCart(pid) { cart = cart.filter(c => c.product_id !== pid); updateCartUI(); }
+
+function updateQty(pid, delta) {
+  const item = cart.find(c => c.product_id === pid);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) { removeFromCart(pid); } else { updateCartUI(); }
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = '₹' + total;
+  const d = document.getElementById('cartItems');
+  if (!cart.length) {
+    d.innerHTML = '<div class="cart-empty"><div class="empty-icon">🧺</div><p>Your cart is empty.</p></div>';
+    return;
+  }
+  d.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img src="${item.img}" alt="${item.name}">
+      <div class="cart-item-info">
+        <h4>${item.name}</h4><span>${item.weight}</span>
+        <div class="cart-item-controls">
+          <button class="qty-btn" onclick="updateQty('${item.product_id}',-1)">−</button>
+          <span class="qty-val">${item.qty}</span>
+          <button class="qty-btn" onclick="updateQty('${item.product_id}',1)">+</button>
+        </div>
+      </div>
+      <span class="cart-item-price">₹${item.price * item.qty}</span>
+    </div>`).join('');
+}
+
+function toggleCart() {
+  document.getElementById('cartSidebar').classList.toggle('open');
+  document.getElementById('cartOverlay').classList.toggle('open');
+}
+
+async function checkout() {
+  if (!cart.length) { showToast('Your cart is empty!'); return; }
+  if (!currentUser) { showToast('Please sign in first'); toggleCart(); openSignIn(); return; }
+  try {
+    const items = cart.map(i => ({ product_id: i.product_id, quantity: i.qty }));
+    const data  = await apiCall('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({ items, payment_method: 'cod', shipping_address: {} })
+    });
+    showToast(`Order placed! ID: ${data.order.order_id.substring(0, 8)}... 🎉`);
+    cart = []; updateCartUI(); toggleCart(); loadRecommendations();
+  } catch (e) { showToast(e.message || 'Failed to place order'); }
+}
+
+// ============================================================================
+// UI HELPERS
+// ============================================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function openSignIn() {
+  document.getElementById('signinOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { const el = document.getElementById('signinEmail'); if (el) el.focus(); }, 350);
+}
+
+function closeSignIn() {
+  document.getElementById('signinOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => {
+    ['signinEmail','signinPassword','signupName','signupEmail','signupPhone','signupPassword'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('signinError').classList.remove('show');
+    document.getElementById('signupError').classList.remove('show');
+    document.getElementById('signinForm').style.display    = '';
+    document.getElementById('signinSuccess').style.display = 'none';
+    switchTab('signin');
+  }, 350);
+}
+
+function handleOverlayClick(e) { if (e.target === document.getElementById('signinOverlay')) closeSignIn(); }
+
+function observeElements(selector) {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.style.animationPlayState = 'running'; obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll(selector).forEach(el => { el.style.animationPlayState = 'paused'; obs.observe(el); });
+}
+
+// ============================================================================
+// HERO & MARQUEE
+// ============================================================================
+function buildHeroGrid() {
+  const imgs = ['https://images.unsplash.com/photo-1599639957043-f3aa5c986398?w=600','https://images.unsplash.com/photo-1506368670568-8f3bbb34793b?w=400','https://images.unsplash.com/photo-1588137378633-dea1336ce1e2?w=400'];
+  document.getElementById('heroGrid').innerHTML = imgs.map(s => `<img src="${s}" alt="Homemade pickles" loading="lazy">`).join('');
+}
+
+function buildMarquee() {
+  const items = ['Fresh Daily Batches','Farm-to-Table Ingredients','Traditional Recipes','No Preservatives','AWS DynamoDB Powered','Real-Time Inventory','Sustainable Packaging','Supporting Local Farmers'];
+  const inner = document.getElementById('marqueeInner');
+  const html  = items.map(t => `<span>${t}</span>`).join('');
+  inner.innerHTML = html + html; // duplicate for seamless loop
+}
+
+// ============================================================================
+// SCROLL & KEYBOARD
+// ============================================================================
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('signinOverlay').classList.contains('open')) closeSignIn();
+});
+
+// ============================================================================
+// INIT
+// ============================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  buildHeroGrid();
+  buildMarquee();
+  checkAuthStatus();
+  loadProducts();
+});
+
+// ============================================================
+//  IMAGE FIX PATCH — correct per-product Unsplash images
+// ============================================================
+const PRODUCT_IMAGES = {
+  // Non-Veg Pickles
+  "Chicken Pickle":         "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600",
+  "Mutton Pickle":          "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=600",
+  "Gongura Mutton":         "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=600",
+  "Fish Pickle":            "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600",
+  "Prawn Pickle":           "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600",
+  "Rohu Fish Pickle":       "https://images.unsplash.com/photo-1485704686097-ed47f7263ca4?w=600",
+  "Crab Pickle":            "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600",
+  "Boneless Chicken Pickle":"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600",
+  // Veg Pickles
+  "Mango Pickle":           "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=600",
+  "Lemon Pickle":           "https://images.unsplash.com/photo-1587486936739-78a3a6d4a176?w=600",
+  "Tomato Pickle":          "https://images.unsplash.com/photo-1558818498-28c1e002b655?w=600",
+  "Gongura Pickle":         "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600",
+  "Mixed Veg Pickle":       "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600",
+  "Amla Pickle":            "https://images.unsplash.com/photo-1596591868231-05e808fd131d?w=600",
+  "Green Chilli Pickle":    "https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=600",
+  "Garlic Pickle":          "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600",
+  "Ginger Pickle":          "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600",
+  // Snacks
+  "Banana Chips":           "https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=600",
+  "Crispy Aam-Papad":       "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=600",
+  "Crispy Chekka Pakodi":   "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=600",
+  "Boondhi Acchu":          "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=600",
+  "Chekkalu":               "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600",
+  "Ragi Laddu":             "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600",
+  "Dry Fruit Laddu":        "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600",
+  "Kara Boondi":            "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=600",
+  "Murukku":                "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600",
+  "Chakli":                 "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600",
+  "Groundnut Chikki":       "https://images.unsplash.com/photo-1559622214-f8a9850965bb?w=600",
+  "Sesame Chikki":          "https://images.unsplash.com/photo-1559622214-f8a9850965bb?w=600",
+  "Coconut Laddu":          "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600",
+  "Besan Laddu":            "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600",
+  "Ribbon Pakoda":          "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=600",
+  "Mixture":                "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600",
+  "Thattai":                "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=600",
+};
+
+const CATEGORY_IMG_FALLBACKS = {
+  "non_veg_pickles": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600",
+  "veg_pickles":     "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=600",
+  "snacks":          "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600",
+  "pickles":         "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=600",
+};
+
+// Patch product data BEFORE rendering
+const _origRenderProducts = renderProducts;
+window.renderProducts = function(products) {
+  const patched = products.map(p => {
+    const name = p.name || '';
+    const cat  = (p.category || '').toLowerCase();
+    const key  = Object.keys(PRODUCT_IMAGES).find(k => name.toLowerCase() === k.toLowerCase()
+                   || name.toLowerCase().includes(k.toLowerCase()));
+    const correctImg = key ? PRODUCT_IMAGES[key]
+                           : (CATEGORY_IMG_FALLBACKS[cat] || p.img);
+    return { ...p, img: correctImg };
+  });
+  _origRenderProducts(patched);
+};
+
+// Also re-patch allProducts array so cart images are correct
+const _origLoadProducts = loadProducts;
+window.loadProducts = async function(category) {
+  await _origLoadProducts(category);
+};
+</script>
+</body>
+</html>
