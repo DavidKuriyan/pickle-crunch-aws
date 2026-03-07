@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Pickle&Crunch{% endblock %}
+
+{% block head %}
+<style>
+  .checkout-page { max-width:600px; margin:0 auto; padding:52px 20px; }
+  .checkout-page h1 { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; color:var(--earth); margin-bottom:2rem; }
+  .form-card { background:white; border-radius:20px; padding:36px; box-shadow:0 8px 28px rgba(44,26,14,.1); margin-bottom:24px; }
+  .form-card h3 { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--earth); margin-bottom:20px; padding-bottom:12px; border-bottom:2px solid var(--light-rust); }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-size:.85rem; font-weight:600; color:var(--earth); margin-bottom:7px; }
+  .form-group input, .form-group textarea, .form-group select { width:100%; padding:13px 16px; border:2px solid rgba(44,26,14,.15); border-radius:12px; font-size:.95rem; font-family:'DM Sans',sans-serif; color:var(--earth); background:var(--cream); outline:none; transition:border-color .2s; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--rust); box-shadow:0 0 0 3px rgba(196,68,10,.1); }
+  .form-group textarea { resize:vertical; min-height:90px; }
+  .payment-options { display:flex; gap:12px; flex-wrap:wrap; }
+  .payment-opt { flex:1; min-width:120px; }
+  .payment-opt input[type="radio"] { display:none; }
+  .payment-opt label { display:flex; align-items:center; gap:10px; padding:14px 16px; border:2px solid rgba(44,26,14,.15); border-radius:12px; cursor:pointer; font-weight:600; font-size:.9rem; transition:all .2s; }
+  .payment-opt input:checked + label { border-color:var(--rust); background:var(--light-rust); color:var(--rust); }
+  .submit-btn { width:100%; padding:16px; background:var(--rust); color:white; border:none; border-radius:50px; font-size:1.05rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s; box-shadow:0 6px 20px rgba(196,68,10,.3); }
+  .submit-btn:hover { background:var(--earth); transform:translateY(-2px); }
+  .error-box { background:#FFF0ED; border:1px solid rgba(196,68,10,.3); color:var(--rust); border-radius:10px; padding:12px 16px; font-size:.88rem; margin-bottom:20px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+  <h1>📦 Checkout</h1>
+
+  {% if error %}
+  <div class="error-box">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/checkout" id="checkoutForm">
+    <div class="form-card">
+      <h3>🏠 Delivery Details</h3>
+      <div class="form-group"><label>Full Name</label><input type="text" name="name" required placeholder="Your full name"></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" name="phone" required placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}"></div>
+      <div class="form-group"><label>Delivery Address</label><textarea name="address" required placeholder="House No., Street, Area, City, PIN"></textarea></div>
+    </div>
+
+    <div class="form-card">
+      <h3>💳 Payment Method</h3>
+      <div class="payment-options">
+        <div class="payment-opt">
+          <input type="radio" id="cod" name="payment" value="cod" checked>
+          <label for="cod">💵 Cash on Delivery</label>
+        </div>
+        <div class="payment-opt">
+          <input type="radio" id="upi" name="payment" value="upi">
+          <label for="upi">📱 UPI</label>
+        </div>
+        <div class="payment-opt">
+          <input type="radio" id="card" name="payment" value="card">
+          <label for="card">💳 Card</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden cart data filled by JS -->
+    <input type="hidden" name="cart_data" id="cartDataInput" value="[]">
+    <input type="hidden" name="total_amount" id="totalAmountInput" value="0">
+
+    <button type="submit" class="submit-btn">Place Order 🎉</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Read cart from sessionStorage and inject into form
+const cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+
+document.getElementById('cartDataInput').value = JSON.stringify(cart);
+document.getElementById('totalAmountInput').value = total;
+
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+  if (cart.length === 0) {
+    e.preventDefault();
+    alert('Your cart is empty! Please add items before checking out.');
+    return;
+  }
+  // Clear cart after successful submission
+  sessionStorage.removeItem('cart');
+});
+</script>
+{% endblock %}

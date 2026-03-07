@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}HomeMade Pickles & Snacks{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --earth: #2C1A0E; --rust: #C4440A; --turmeric: #E8960C;
+    --cream: #FDF6EC; --sage: #7A8C5E; --clay: #A0522D;
+    --light-rust: #F5E6D3; --dark: #1A0F07; --white: #FFFDF9;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--earth); overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:9999; opacity:.4;
+  }
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 5%; background:rgba(253,246,236,0.92);
+    backdrop-filter:blur(12px); border-bottom:1px solid rgba(196,68,10,0.12); transition:all .3s;
+  }
+  nav.scrolled { padding:12px 5%; box-shadow:0 4px 24px rgba(44,26,14,0.1); }
+  .nav-logo { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:900; color:var(--rust); letter-spacing:-.5px; text-decoration:none; }
+  .nav-logo span { color:var(--turmeric); }
+  .nav-links { display:flex; gap:2rem; list-style:none; }
+  .nav-links a { font-size:.9rem; font-weight:500; color:var(--earth); text-decoration:none; letter-spacing:.3px; position:relative; transition:color .2s; }
+  .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:2px; background:var(--rust); transform:scaleX(0); transition:transform .3s; transform-origin:left; }
+  .nav-links a:hover { color:var(--rust); }
+  .nav-links a:hover::after { transform:scaleX(1); }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .nav-btn {
+    padding:9px 22px; border-radius:50px; font-size:.9rem; font-weight:600;
+    font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s; text-decoration:none;
+    display:inline-block;
+  }
+  .nav-btn-outline { background:transparent; color:var(--earth); border:2px solid var(--earth); }
+  .nav-btn-outline:hover { background:var(--earth); color:white; }
+  .nav-btn-rust { background:var(--rust); color:white; border:2px solid var(--rust); }
+  .nav-btn-rust:hover { background:var(--earth); border-color:var(--earth); }
+  .cart-btn {
+    background:var(--rust); color:white; border:none; cursor:pointer;
+    padding:10px 22px; border-radius:50px; font-size:.9rem; font-weight:600;
+    font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:8px; transition:all .25s;
+  }
+  .cart-btn:hover { background:var(--earth); transform:translateY(-2px); box-shadow:0 8px 20px rgba(196,68,10,.35); }
+  .cart-count { background:var(--turmeric); color:var(--earth); width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; }
+  footer { background:var(--earth); color:rgba(255,255,255,.7); text-align:center; padding:32px 5%; font-size:.88rem; }
+  footer strong { color:var(--turmeric); }
+  .toast {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px);
+    background:var(--earth); color:white; padding:14px 28px; border-radius:50px;
+    font-size:.9rem; font-weight:600; z-index:400; box-shadow:0 8px 24px rgba(44,26,14,.4);
+    opacity:0; transition:all .3s cubic-bezier(.4,0,.2,1); pointer-events:none;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:all; }
+  @media(max-width:900px) { nav .nav-links { display:none; } }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="/" class="nav-logo">Pickle<span>&</span>Crunch</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/non_veg_pickles">Non-Veg Pickles</a></li>
+    <li><a href="/veg_pickles">Veg Pickles</a></li>
+    <li><a href="/snacks">Snacks</a></li>
+    <li><a href="/about">About</a></li>
+  </ul>
+  <div class="nav-right">
+    {% if session.get('logged_in') %}
+      <span style="font-size:.88rem;font-weight:600;color:var(--earth);">👤 {{ session.get('username') }}</span>
+      <a href="/logout" class="nav-btn nav-btn-outline" style="padding:7px 18px;font-size:.85rem;">Logout</a>
+    {% else %}
+      <a href="/login"  class="nav-btn nav-btn-outline">Sign In</a>
+      <a href="/signup" class="nav-btn nav-btn-rust">Sign Up</a>
+    {% endif %}
+    <a href="/cart" class="cart-btn">
+      <span>Cart</span>
+      <div class="cart-count">{{ session.get('cart', [])|length }}</div>
+    </a>
+  </div>
+</nav>
+
+<div style="padding-top:72px;">
+{% block content %}{% endblock %}
+</div>
+
+<footer>
+  <p>© 2024 <strong>Pickle&amp;Crunch</strong> — Artisan Homemade Delicacies. Powered by AWS.</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  });
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

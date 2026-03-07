@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Non-Veg Pickles — Pickle&Crunch{% endblock %}
+
+{% block head %}
+<style>
+  .page-header { background:linear-gradient(135deg,var(--earth),var(--clay)); color:white; padding:52px 5% 40px; }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:900; margin-bottom:8px; }
+  .page-header p { opacity:.85; font-size:1rem; max-width:500px; line-height:1.6; }
+  .products-section { padding:52px 5%; }
+  .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; }
+  .product-card { background:white; border-radius:20px; overflow:hidden; box-shadow:0 6px 24px rgba(44,26,14,.08); transition:all .3s; }
+  .product-card:hover { transform:translateY(-6px); box-shadow:0 12px 40px rgba(44,26,14,.15); }
+  .product-img { position:relative; overflow:hidden; height:240px; }
+  .product-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+  .product-card:hover .product-img img { transform:scale(1.08); }
+  .product-tag { position:absolute; top:12px; left:12px; background:var(--turmeric); color:var(--dark); padding:5px 14px; border-radius:20px; font-size:.75rem; font-weight:700; text-transform:uppercase; }
+  .product-body { padding:20px; }
+  .product-name { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--earth); margin-bottom:12px; }
+  .weight-selector { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .weight-btn { padding:6px 14px; border-radius:20px; border:2px solid rgba(44,26,14,.2); background:transparent; font-size:.82rem; font-weight:600; font-family:'DM Sans',sans-serif; color:var(--earth); cursor:pointer; transition:all .2s; }
+  .weight-btn.active, .weight-btn:hover { background:var(--rust); border-color:var(--rust); color:white; }
+  .product-footer { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid rgba(44,26,14,.08); }
+  .price-main { font-size:1.3rem; font-weight:700; color:var(--rust); }
+  .add-btn { background:var(--rust); color:white; border:none; padding:10px 22px; border-radius:50px; font-size:.9rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s; }
+  .add-btn:hover { background:var(--earth); transform:translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>🍖 Non-Veg Pickles</h1>
+  <p>Hand-crafted meat and seafood pickles made with traditional Andhra recipes and the finest spices.</p>
+</div>
+
+<div class="products-section">
+  <div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+      <div class="product-img">
+        <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy">
+        <span class="product-tag">{{ product.tag or 'Popular' }}</span>
+      </div>
+      <div class="product-body">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p style="font-size:.87rem;color:#6B4423;margin-bottom:12px;line-height:1.5;">{{ product.desc or '' }}</p>
+        <div class="weight-selector" id="weights-{{ product.ProductID }}">
+          {% for weight, price in product.weights.items() %}
+          <button class="weight-btn {% if loop.first %}active{% endif %}"
+            onclick="selectWeight('{{ product.ProductID }}', this, {{ price }}, '{{ weight }}g')">
+            {{ weight }}g — ₹{{ price }}
+          </button>
+          {% endfor %}
+        </div>
+        <div class="product-footer">
+          <span class="price-main" id="price-{{ product.ProductID }}">
+            ₹{{ product.weights.values()|list|first }}
+          </span>
+          <button class="add-btn" onclick="addToSession('{{ product.ProductID }}','{{ product.name }}','{{ product.img }}')">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const selectedWeights = {};
+
+function selectWeight(pid, btn, price, weight) {
+  document.querySelectorAll(`#weights-${pid} .weight-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`price-${pid}`).textContent = '₹' + price;
+  selectedWeights[pid] = { price, weight };
+}
+
+function addToSession(pid, name, img) {
+  const sel = selectedWeights[pid];
+  const price = sel ? sel.price : 0;
+  const weight = sel ? sel.weight : '250g';
+
+  // Store in sessionStorage for cart page
+  const cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+  const existing = cart.find(i => i.id === pid && i.weight === weight);
+  if (existing) { existing.qty++; }
+  else { cart.push({ id: pid, name, img, price, weight, qty: 1 }); }
+  sessionStorage.setItem('cart', JSON.stringify(cart));
+
+  showToast(`${name} (${weight}) added to cart 🛒`);
+}
+</script>
+{% endblock %}

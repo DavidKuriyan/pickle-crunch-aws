@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Your Cart — Pickle&Crunch{% endblock %}
+
+{% block head %}
+<style>
+  .cart-page { max-width:900px; margin:0 auto; padding:52px 20px; }
+  .cart-page h1 { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; color:var(--earth); margin-bottom:2rem; }
+  .cart-empty-state { text-align:center; padding:80px 20px; }
+  .cart-empty-state .icon { font-size:5rem; margin-bottom:16px; }
+  .cart-empty-state p { font-size:1rem; color:#6B4423; margin-bottom:24px; }
+  .cart-item { display:flex; gap:20px; background:white; border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 4px 16px rgba(44,26,14,.07); align-items:center; }
+  .cart-item img { width:90px; height:90px; object-fit:cover; border-radius:12px; flex-shrink:0; }
+  .cart-item-info { flex:1; }
+  .cart-item-info h4 { font-size:1rem; font-weight:700; color:var(--earth); margin-bottom:4px; }
+  .cart-item-info span { font-size:.82rem; color:#8A6040; }
+  .qty-controls { display:flex; align-items:center; gap:12px; margin-top:12px; }
+  .qty-btn { background:var(--light-rust); border:none; cursor:pointer; width:32px; height:32px; border-radius:50%; font-size:1.2rem; font-weight:600; display:flex; align-items:center; justify-content:center; color:var(--earth); transition:all .2s; }
+  .qty-btn:hover { background:var(--rust); color:white; }
+  .qty-val { font-size:1rem; font-weight:700; min-width:28px; text-align:center; }
+  .cart-item-price { font-size:1.2rem; font-weight:700; color:var(--rust); flex-shrink:0; }
+  .remove-btn { background:none; border:none; cursor:pointer; color:#C9B5A5; font-size:1.3rem; padding:8px; transition:color .2s; }
+  .remove-btn:hover { color:var(--rust); }
+  .cart-summary { background:white; border-radius:20px; padding:28px; box-shadow:0 8px 28px rgba(44,26,14,.1); margin-top:24px; }
+  .cart-summary h3 { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--earth); margin-bottom:20px; }
+  .summary-row { display:flex; justify-content:space-between; margin-bottom:12px; font-size:.95rem; color:#6B4423; }
+  .summary-total { display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:2px solid rgba(44,26,14,.1); margin-top:8px; }
+  .summary-total span { font-size:1.1rem; font-weight:700; color:var(--earth); }
+  .summary-total strong { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; color:var(--rust); }
+  .checkout-btn { display:block; width:100%; padding:16px; background:var(--rust); color:white; border:none; border-radius:50px; font-size:1.05rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s; margin-top:20px; text-align:center; box-shadow:0 6px 20px rgba(196,68,10,.3); }
+  .checkout-btn:hover { background:var(--earth); transform:translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+  <h1>🛒 Your Cart</h1>
+
+  <div id="cartContent">
+    <div class="cart-empty-state" id="emptyState" style="display:none;">
+      <div class="icon">🧺</div>
+      <p>Your cart is empty. Let's fix that!</p>
+      <a href="/" class="checkout-btn" style="max-width:220px;margin:0 auto;text-decoration:none;">Browse Products</a>
+    </div>
+    <div id="cartItems"></div>
+    <div class="cart-summary" id="cartSummary" style="display:none;">
+      <h3>Order Summary</h3>
+      <div class="summary-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+      <div class="summary-row"><span>Delivery</span><span style="color:var(--sage);">Free</span></div>
+      <div class="summary-total"><span>Total</span><strong id="totalAmount">₹0</strong></div>
+      <a href="/checkout" id="checkoutLink" class="checkout-btn">Proceed to Checkout</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+
+function renderCart() {
+  const itemsDiv = document.getElementById('cartItems');
+  const summaryDiv = document.getElementById('cartSummary');
+  const emptyDiv = document.getElementById('emptyState');
+
+  if (cart.length === 0) {
+    itemsDiv.innerHTML = '';
+    summaryDiv.style.display = 'none';
+    emptyDiv.style.display = 'block';
+    return;
+  }
+
+  emptyDiv.style.display = 'none';
+  summaryDiv.style.display = 'block';
+
+  let total = 0;
+  itemsDiv.innerHTML = cart.map((item, i) => {
+    total += item.price * item.qty;
+    return `
+    <div class="cart-item">
+      <img src="${item.img}" alt="${item.name}">
+      <div class="cart-item-info">
+        <h4>${item.name}</h4>
+        <span>${item.weight}</span>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty(${i},-1)">−</button>
+          <span class="qty-val">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
+        </div>
+      </div>
+      <span class="cart-item-price">₹${item.price * item.qty}</span>
+      <button class="remove-btn" onclick="removeItem(${i})" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('subtotal').textContent = '₹' + total;
+  document.getElementById('totalAmount').textContent = '₹' + total;
+
+  // Pass cart data to checkout via query or sessionStorage (already stored)
+}
+
+function changeQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) cart.splice(index, 1);
+  sessionStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  sessionStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+}
+
+renderCart();
+</script>
+{% endblock %}
