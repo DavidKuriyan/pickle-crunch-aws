@@ -22,7 +22,9 @@ app.secret_key = os.environ.get('SECRET_KEY', 'homemade_pickles_secret_2024')
 #   export AWS_REGION=ap-south-1
 #   python app.py
 # ============================================================
-
+AWS_ACCESS_KEY_ID     = os.environ.get('AWS_ACCESS_KEY_ID', 'AKIAUTKU2AVYXWVVWEMM')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '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')
+AWS_REGION            = os.environ.get('AWS_REGION', 'ap-south-1')
 
 # Connect to DynamoDB using AWS CLI credentials
 dynamodb = boto3.resource(
